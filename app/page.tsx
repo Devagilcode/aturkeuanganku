@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type TransactionType = "income" | "expense";
 
@@ -15,6 +15,7 @@ type Transaction = {
 
 const expenseCategories = ["Makan", "Bensin", "Jajan", "Main", "Belanja", "Tagihan", "Kebutuhan lain"];
 const incomeCategories = ["Gaji", "Freelance", "Bonus", "Hadiah", "Pemasukan lain"];
+const STORAGE_KEY = "atur-uang-transactions";
 
 const rupiah = new Intl.NumberFormat("id-ID", {
   style: "currency",
@@ -35,25 +36,26 @@ function formatDate(value: string) {
   }).format(new Date(`${value}T00:00:00`));
 }
 
-function isTransaction(value: unknown): value is Transaction {
-  if (value === null || typeof value !== "object") return false;
-  const transaction = value as Record<string, unknown>;
-  return typeof transaction.id === "string" &&
-    (transaction.type === "income" || transaction.type === "expense") &&
-    typeof transaction.amount === "number" &&
-    Number.isSafeInteger(transaction.amount) &&
-    transaction.amount > 0 &&
-    typeof transaction.category === "string" &&
-    typeof transaction.note === "string" &&
-    typeof transaction.date === "string";
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-async function responseError(response: Response, fallback: string) {
-  const data: unknown = await response.json().catch(() => null);
-  if (data !== null && typeof data === "object" && "error" in data && typeof data.error === "string") {
-    return data.error;
-  }
-  return fallback;
+function isTransaction(value: unknown): value is Transaction {
+  if (!isRecord(value)) return false;
+  const transaction = value;
+  if (typeof transaction.id !== "string" || !transaction.id) return false;
+  if (transaction.type !== "income" && transaction.type !== "expense") return false;
+  if (typeof transaction.amount !== "number" || !Number.isSafeInteger(transaction.amount) || transaction.amount <= 0) return false;
+  const categories = transaction.type === "income" ? incomeCategories : expenseCategories;
+  if (typeof transaction.category !== "string" || !categories.includes(transaction.category)) return false;
+  if (typeof transaction.note !== "string" || transaction.note.length > 80) return false;
+  if (typeof transaction.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(transaction.date)) return false;
+  const parsedDate = new Date(`${transaction.date}T00:00:00.000Z`);
+  return !Number.isNaN(parsedDate.getTime()) && parsedDate.toISOString().slice(0, 10) === transaction.date;
+}
+
+function isTransactionList(value: unknown): value is Transaction[] {
+  return Array.isArray(value) && value.every(isTransaction);
 }
 
 function Icon({
@@ -114,34 +116,25 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [period, setPeriod] = useState("Semua waktu");
   const [error, setError] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState("");
   const [showReport, setShowReport] = useState(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    let active = true;
-    async function loadTransactions() {
-      try {
-        const response = await fetch("/api/transactions", { cache: "no-store" });
-        if (!response.ok) {
-          throw new Error(await responseError(response, "Data transaksi gagal dimuat."));
-        }
-        const data: unknown = await response.json();
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEY);
+      if (saved !== null) {
+        const data: unknown = JSON.parse(saved);
         if (!Array.isArray(data) || !data.every(isTransaction)) {
-          throw new Error("Format data transaksi dari penyimpanan lokal tidak valid.");
+          throw new Error("Data tersimpan tidak valid. Impor cadangan JSON untuk memulihkannya.");
         }
-        if (active) setTransactions(data);
-      } catch (cause) {
-        if (active) {
-          setError(cause instanceof Error ? cause.message : "Data transaksi gagal dimuat.");
-        }
-      } finally {
-        if (active) setReady(true);
+        setTransactions(data);
       }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Data transaksi gagal dimuat dari browser.");
+    } finally {
+      setReady(true);
     }
-    void loadTransactions();
-    return () => {
-      active = false;
-    };
   }, []);
 
   useEffect(() => {
@@ -193,7 +186,20 @@ export default function Home() {
       .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
   }, [transactions, filter, period, query]);
 
-  async function addTransaction(event: FormEvent<HTMLFormElement>) {
+  function saveTransactions(next: Transaction[]) {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      setTransactions(next);
+      setError("");
+      setStatus("");
+      return true;
+    } catch {
+      setError("Data gagal disimpan di browser. Unduh cadangan atau kosongkan penyimpanan browser.");
+      return false;
+    }
+  }
+
+  function addTransaction(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = Number(amount);
     if (!Number.isSafeInteger(value) || value <= 0) {
@@ -205,43 +211,69 @@ export default function Home() {
       return;
     }
 
-    setSaving(true);
     setError("");
-    try {
-      const response = await fetch("/api/transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, amount: value, category, note: note.trim(), date }),
-      });
-      if (!response.ok) {
-        throw new Error(await responseError(response, "Transaksi gagal disimpan."));
-      }
-      const saved: unknown = await response.json();
-      if (!isTransaction(saved)) {
-        throw new Error("Server mengembalikan data transaksi yang tidak valid.");
-      }
-      setTransactions((current) => [saved, ...current]);
+    const transaction: Transaction = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      type,
+      amount: value,
+      category,
+      note: note.trim(),
+      date,
+    };
+    if (saveTransactions([transaction, ...transactions])) {
       setAmount("");
       setNote("");
       setDate(today());
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Transaksi gagal disimpan.");
-    } finally {
-      setSaving(false);
     }
   }
 
-  async function deleteTransaction(id: string) {
+  function deleteTransaction(id: string) {
     setError("");
+    saveTransactions(transactions.filter((transaction) => transaction.id !== id));
+  }
+
+  async function importTransactions(event: ChangeEvent<HTMLInputElement>) {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    if (!file) return;
+    setError("");
+    setStatus("");
     try {
-      const response = await fetch(`/api/transactions?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-      if (!response.ok) {
-        throw new Error(await responseError(response, "Transaksi gagal dihapus."));
+      const imported: unknown = JSON.parse(await file.text());
+      if (!isTransactionList(imported)) {
+        throw new Error("File cadangan tidak memiliki format transaksi yang valid.");
       }
-      setTransactions((current) => current.filter((transaction) => transaction.id !== id));
+      const existingIds = new Set(transactions.map((transaction) => transaction.id));
+      const newTransactions: Transaction[] = [];
+      for (const transaction of imported) {
+        if (existingIds.has(transaction.id)) continue;
+        existingIds.add(transaction.id);
+        newTransactions.push(transaction);
+      }
+      if (newTransactions.length === 0) {
+        setStatus("Tidak ada transaksi baru di file cadangan.");
+        return;
+      }
+      if (saveTransactions([...newTransactions, ...transactions])) {
+        setStatus(`${newTransactions.length} transaksi berhasil diimpor.`);
+      }
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Transaksi gagal dihapus.");
+      setError(cause instanceof Error ? cause.message : "File cadangan gagal dibaca.");
+    } finally {
+      input.value = "";
     }
+  }
+
+  function downloadBackup() {
+    const file = new Blob([JSON.stringify(transactions, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `cadangan-transaksi-${today()}.json`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   const categories = type === "expense" ? expenseCategories : incomeCategories;
@@ -263,7 +295,7 @@ export default function Home() {
             <strong>Langkah kecil,<br />keuangan terkendali.</strong>
             <p>Catat setiap transaksi agar tujuanmu makin dekat.</p>
           </div>
-          <div className="privacy-note"><span className="privacy-dot" />Data tersimpan di file lokal aplikasi</div>
+          <div className="privacy-note"><span className="privacy-dot" />Data hanya tersimpan di browser ini</div>
         </div>
       </aside>
 
@@ -311,6 +343,8 @@ export default function Home() {
                 <div><h3>Transaksi</h3><p>Catatan uang masuk dan keluar</p></div>
                 <div className="transaction-actions">
                   <span className="transaction-count">{visibleTransactions.length} catatan</span>
+                  <input ref={importInputRef} className="hidden-file-input" type="file" accept="application/json,.json" onChange={importTransactions} aria-label="Pilih file cadangan transaksi" />
+                  <button className="report-button" type="button" onClick={() => importInputRef.current?.click()}>Impor data</button>
                   <button className="report-button" type="button" onClick={() => setShowReport(true)}><Icon name="print" size={15} /> Pratinjau cetak</button>
                 </div>
               </div>
@@ -364,8 +398,9 @@ export default function Home() {
                 <label className="form-field"><span className="field-label">CATATAN <span className="optional">(opsional)</span></span><input type="text" maxLength={80} placeholder={type === "expense" ? "Contoh: makan siang" : "Contoh: gaji bulan ini"} value={note} onChange={(event) => setNote(event.target.value)} /></label>
                 <label className="form-field"><span className="field-label">TANGGAL</span><input type="date" value={date} max={today()} onChange={(event) => setDate(event.target.value)} required /></label>
                 {error && <p className="form-error" role="alert">{error}</p>}
-                <button className="submit-button" type="submit" disabled={!ready || saving}><Icon name="plus" size={18} /> {saving ? "Menyimpan..." : "Simpan transaksi"}</button>
-                <p className="form-privacy"><span className="privacy-dot" />Tersimpan di penyimpanan lokal aplikasi</p>
+                {status && <p className="form-status" role="status">{status}</p>}
+                <button className="submit-button" type="submit" disabled={!ready}><Icon name="plus" size={18} /> Simpan transaksi</button>
+                <p className="form-privacy"><span className="privacy-dot" />Tersimpan di browser ini. Unduh cadangan secara berkala.</p>
               </form>
             </aside>
           </section>
@@ -380,6 +415,7 @@ export default function Home() {
             <div className="report-toolbar print-hide">
               <span><Icon name="print" size={16} /> Pratinjau laporan</span>
               <div>
+                <button className="report-button" type="button" onClick={downloadBackup}>Unduh cadangan</button>
                 <button className="report-print-button" type="button" onClick={() => window.print()}><Icon name="print" size={15} /> Cetak</button>
                 <button className="report-close-button" type="button" onClick={() => setShowReport(false)} aria-label="Tutup pratinjau"><Icon name="close" size={18} /></button>
               </div>
