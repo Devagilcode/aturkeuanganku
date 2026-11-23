@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Atur Uang — Catatan Keuangan",
-  description: "Kelola pemasukan dan pengeluaranmu dengan mudah.",
+  title: "DAUA — Devagil Atur Uang Anda",
+  description: "Catat transaksi, kelola anggaran, dan capai target tabungan bersama DAUA.",
 };
 
 export default function RootLayout({
