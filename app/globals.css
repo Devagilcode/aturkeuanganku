@@ -308,6 +308,11 @@ a { color: inherit; text-decoration: none; }
 .brand > span:last-child { color: #23332a; }
 .brand .brand-light { color: #59846e; }
 .brand:not(.auth-brand) small { max-width: 165px; white-space: nowrap; }
+.brand-stacked { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 42px; }
+.brand-stacked > span:last-child { display: flex; flex-direction: column; gap: 3px; }
+.brand-stacked small { margin-top: 0; letter-spacing: 1.15px; }
+.auth-brand.brand-stacked { align-items: center; margin: 0 auto 30px; }
+.auth-brand.brand-stacked > span:last-child { align-items: center; }
 .profile-chip { display: flex; min-width: 0; align-items: center; gap: 9px; padding: 4px 10px 4px 5px; border: 1px solid #edf0ed; border-radius: 999px; background: #fbfcfb; }
 .profile-avatar { display: grid; width: 35px; height: 35px; flex: 0 0 35px; place-items: center; border: 1px solid #e4eee6; border-radius: 50%; object-fit: cover; }
 .profile-initials { background: #e7f2eb; color: #26734f; font-size: 11px; font-weight: 700; }
@@ -395,6 +400,8 @@ a { color: inherit; text-decoration: none; }
 }
 @media (max-width: 780px) {
   .account-actions { gap: 7px; }
+  .sidebar .brand-stacked { flex-direction: row; align-items: center; gap: 10px; margin: 0; }
+  .sidebar .brand-stacked > span:last-child { display: block; }
   .profile-chip { padding-right: 5px; border: 0; background: transparent; }
   .profile-copy { display: none; }
   .bottom-nav { position: fixed; inset: auto 0 0; z-index: 15; display: grid; grid-template-columns: repeat(5, 1fr); padding: 7px max(8px, env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); border-top: 1px solid #e8ede9; background: #ffffffed; box-shadow: 0 -7px 24px #17241f0a; backdrop-filter: blur(14px); }

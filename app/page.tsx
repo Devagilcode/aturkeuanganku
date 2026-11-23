@@ -744,9 +744,9 @@ export default function Home() {
     return (
       <main className="auth-page">
         <section className="auth-card">
-          <a className="brand auth-brand" href="#" aria-label="DAUA beranda">
+          <a className="brand brand-stacked auth-brand" href="#" aria-label="DAUA beranda">
             <BrandMark />
-            <span>DAUA<small>DEVAGIL ATUR UANG ANDA</small></span>
+            <span>DAUA<small>ATUR UANG</small></span>
           </a>
           <p className="eyebrow">RUANG KEUANGAN PRIBADI</p>
           <h1>{authMode === "login" ? "Selamat datang kembali" : "Buat akun baru"}</h1>
@@ -785,9 +785,9 @@ export default function Home() {
   return (
     <main className="app-shell">
       <aside className="sidebar">
-        <a className="brand" href="#home" aria-label="DAUA beranda">
+        <a className="brand brand-stacked" href="#home" aria-label="DAUA beranda">
           <BrandMark />
-          <span>DAUA<small>DEVAGIL ATUR UANG ANDA</small></span>
+          <span>DAUA<small>ATUR UANG</small></span>
         </a>
         <div className="nav-caption">MENU UTAMA</div>
         <a className={`nav-link ${activeSection === "home" ? "active" : ""}`} href="#home" onClick={() => setActiveSection("home")}><span className="nav-icon"><Icon name="home" /></span>Beranda</a>
