@@ -451,3 +451,54 @@ a { color: inherit; text-decoration: none; }
   .budget-overview strong { font-size: 13px; }
   .category-bar-row { grid-template-columns: 62px minmax(25px, 1fr) minmax(68px, auto); gap: 6px; }
 }
+
+body { font-size: 16px; }
+.nav-link, .top-date, .welcome-sub, .primary-button, .submit-button,
+.panel-heading p, .search-field input, .toolbar select,
+.transaction-amount, .empty-state p, .empty-state a,
+.form-field input, .form-field select, .amount-input > span,
+.form-error, .form-status, .page-footer,
+.account-email, .sign-out-button, .auth-description,
+.google-button, .auth-switch, .management-form .form-field input,
+.management-form .form-field select, .management-form .submit-button,
+.contribution-form input, .contribution-button, .report-actions .report-button,
+.report-actions .report-print-button {
+  font-size: 13px;
+}
+.breadcrumb, .nav-caption, .eyebrow, .card-label, .summary-label,
+.field-label, .toggle-options button, .form-privacy, .privacy-note,
+.sidebar-tip p, .management-hint, .budget-overview span,
+.budget-overview strong small, .budget-row-top span, .goal-card-top span,
+.budget-row-foot, .goal-card-foot, .goal-progress-label,
+.category-bar-row > span, .category-bar-row > strong,
+.report-date, .report-summary span, .report-table td,
+.report-table th,
+.report-empty, .report-empty-inline, .report-footer,
+.report-button, .transaction-count, .transaction-details span,
+.profile-copy small, .bottom-nav a, .section-heading > div > p:last-child,
+.dashboard-message, .auth-divider, .auth-privacy, .auth-card .form-error,
+.auth-card .form-status, .management-form .field-label {
+  font-size: 12px;
+}
+.topbar h1 { font-size: 19px; }
+.welcome-row h2 { font-size: clamp(19px, 2vw, 24px); }
+.balance-foot, .summary-foot, .panel-heading p, .transaction-details strong,
+.empty-state strong, .management-form h3, .budget-row-top strong,
+.goal-card h3, .goal-progress-label strong, .compact-empty strong,
+.category-report-heading h3, .report-insight-card > small,
+.profile-copy strong, .report-toolbar > span, .report-print-button {
+  font-size: 14px;
+}
+.summary-value { font-size: 21px; }
+.summary-label, .card-label { letter-spacing: .5px; }
+.bottom-nav a { font-size: 11px; }
+
+@media (max-width: 480px) {
+  .summary-value { font-size: 18px; }
+  .transaction-details strong { font-size: 13px; }
+  .page-footer { font-size: 11px; }
+  .top-date { font-size: 0; }
+  .primary-button { font-size: 0; }
+  .transaction-amount { font-size: 11px; }
+  .transaction-actions .report-button { font-size: 11px; }
+}
