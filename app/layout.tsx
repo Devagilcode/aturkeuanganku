@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "DAUA | Atur Uang",
+  title: "Devagil | DAUA",
   description: "Devagil Atur Uang Anda: catat transaksi, kelola anggaran, dan capai target tabungan bersama DAUA.",
 };
 

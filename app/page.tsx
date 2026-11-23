@@ -744,9 +744,9 @@ export default function Home() {
     return (
       <main className="auth-page">
         <section className="auth-card">
-          <a className="brand brand-stacked auth-brand" href="#" aria-label="DAUA beranda">
+          <a className="brand brand-stacked auth-brand" href="#" aria-label="Devagil beranda">
             <BrandMark />
-            <span>DAUA<small>ATUR UANG</small></span>
+            <span>Devagil<small>DAUA · ATUR UANG</small></span>
           </a>
           <p className="eyebrow">RUANG KEUANGAN PRIBADI</p>
           <h1>{authMode === "login" ? "Selamat datang kembali" : "Buat akun baru"}</h1>
@@ -785,9 +785,9 @@ export default function Home() {
   return (
     <main className="app-shell">
       <aside className="sidebar">
-        <a className="brand brand-stacked" href="#home" aria-label="DAUA beranda">
+        <a className="brand brand-stacked" href="#home" aria-label="Devagil beranda">
           <BrandMark />
-          <span>DAUA<small>ATUR UANG</small></span>
+          <span>Devagil<small>DAUA · ATUR UANG</small></span>
         </a>
         <div className="nav-caption">MENU UTAMA</div>
         <a className={`nav-link ${activeSection === "home" ? "active" : ""}`} href="#home" onClick={() => setActiveSection("home")}><span className="nav-icon"><Icon name="home" /></span>Beranda</a>
@@ -808,7 +808,7 @@ export default function Home() {
       <section className="main-area">
         <header className="topbar">
           <div>
-            <div className="breadcrumb">DAUA <span>/</span> <b>{activeSection === "budgets" ? "Anggaran" : activeSection === "goals" ? "Target tabungan" : activeSection === "reports" ? "Laporan" : activeSection === "transactions" ? "Transaksi" : "Beranda"}</b></div>
+            <div className="breadcrumb">Devagil <span>/</span> <b>{activeSection === "budgets" ? "Anggaran" : activeSection === "goals" ? "Target tabungan" : activeSection === "reports" ? "Laporan" : activeSection === "transactions" ? "Transaksi" : "Beranda"}</b></div>
             <h1>Ruang keuanganmu</h1>
           </div>
           <div className="account-actions">
@@ -1014,7 +1014,7 @@ export default function Home() {
             </div>
           </section>
 
-          <footer className="page-footer"><span>DAUA · Devagil Atur Uang Anda</span><span>Rencanakan hari ini, capai tujuan esok <span className="footer-heart">♥</span></span></footer>
+          <footer className="page-footer"><span>Devagil · DAUA</span><span>Rencanakan hari ini, capai tujuan esok <span className="footer-heart">♥</span></span></footer>
         </div>
       </section>
       <nav className="bottom-nav" aria-label="Navigasi utama">
@@ -1038,7 +1038,7 @@ export default function Home() {
               </div>
             </div>
             <header className="report-header">
-              <div className="report-brand"><BrandMark /> DAUA</div>
+              <div className="report-brand"><BrandMark /> Devagil · DAUA</div>
               <p className="report-kicker">LAPORAN KEUANGAN</p>
               <h2 id="report-title">Semua Transaksi</h2>
               <p className="report-date">Dicetak pada {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date())}</p>
@@ -1068,7 +1068,7 @@ export default function Home() {
                 </table>
               </div>
             )}
-            <footer className="report-footer"><span>{transactions.length} transaksi</span><span>DAUA · Devagil Atur Uang Anda</span></footer>
+            <footer className="report-footer"><span>{transactions.length} transaksi</span><span>Devagil · DAUA</span></footer>
           </section>
         </div>
       )}
