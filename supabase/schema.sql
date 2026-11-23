@@ -14,7 +14,7 @@ create index if not exists transactions_user_date_idx
 alter table public.transactions enable row level security;
 
 revoke all on public.transactions from anon, authenticated;
-grant select, insert, delete on public.transactions to authenticated;
+grant select, insert, update, delete on public.transactions to authenticated;
 
 drop policy if exists "Users can read their own transactions" on public.transactions;
 create policy "Users can read their own transactions"
@@ -24,6 +24,12 @@ create policy "Users can read their own transactions"
 drop policy if exists "Users can add their own transactions" on public.transactions;
 create policy "Users can add their own transactions"
   on public.transactions for insert to authenticated
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists "Users can update their own transactions" on public.transactions;
+create policy "Users can update their own transactions"
+  on public.transactions for update to authenticated
+  using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
 drop policy if exists "Users can delete their own transactions" on public.transactions;

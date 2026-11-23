@@ -8,8 +8,8 @@ database; setiap transaksi dilindungi kebijakan Row Level Security (RLS).
 1. Buat proyek di [supabase.com](https://supabase.com/).
 2. Buka **SQL Editor**, lalu jalankan isi [`supabase/schema.sql`](./supabase/schema.sql).
    Jalankan ulang skrip ini setelah pembaruan aplikasi agar tabel `budgets` dan
-   `savings_goals` beserta kebijakan RLS-nya ikut dibuat. Skrip dapat dijalankan
-   berulang kali dengan aman.
+   `savings_goals`, serta izin RLS untuk mengedit transaksi, ikut dibuat.
+   Skrip dapat dijalankan berulang kali dengan aman.
 3. Project URL dan publishable key sudah diisi di konfigurasi lokal dan workflow.
    Jangan gunakan atau publikasikan `service_role` key.
 
